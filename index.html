@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Trivia Quiz</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --background: #f3f4f6;
+            --surface: #ffffff;
+            --text: #1f2937;
+            --text-muted: #4b5563;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+        body { background: var(--background); color: var(--text); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .quiz-container { background: var(--surface); width: 100%; max-width: 600px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        header { display: flex; justify-content: space-between; margin-bottom: 24px; font-weight: bold; color: var(--text-muted); }
+        
+        h2 { font-size: 1.5rem; margin-bottom: 20px; }
+        
+        .instructions-card {
+            text-align: left;
+            background: #f9fafb;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .instructions-card strong {
+            color: var(--text);
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        .instructions-card ul {
+            padding-left: 20px;
+        }
+        .instructions-card li {
+            margin-bottom: 6px;
+        }
+        /* Word & Letter Input Layout */
+        .words-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            margin-bottom: 24px; 
+            width: 100%; 
+            align-items: center; 
+            container-type: inline-size; 
+        }
+        
+        .word-row { display: flex; gap: 6px; justify-content: center; width: 100%; flex-wrap: nowrap; }
+        
+        .letter-box { 
+            width: min(45px, calc((100% - var(--total-gaps)) / var(--max-letters))); 
+            aspect-ratio: 1;
+            height: auto;
+            min-width: 0; 
+            padding: 0;
+            text-align: center; 
+            font-size: min(1.25rem, calc((100cqw / var(--max-letters)) * 0.55)); 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            border: 2px solid #d1d5db; 
+            border-radius: 8px; 
+            outline: none; 
+            transition: border-color 0.2s; 
+        }
+        
+        .letter-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .letter-box.correct { border-color: var(--success); background: #ecfdf5; }
+        .letter-box.wrong { border-color: var(--danger); background: #fef2f2; }
+        .letter-box:disabled { opacity: 0.7; }
+
+        /* Clues Section */
+        .clues-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .clue-card { background: #f9fafb; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+        .clue-hint { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        
+        /* Buttons */
+        button { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; font-size: 0.95rem; }
+        button:active { transform: scale(0.98); }
+        button:disabled { cursor: not-allowed; opacity: 0.7; }
+        .btn-clue { background: #e5e7eb; color: var(--text); }
+        .btn-clue:hover:not(:disabled) { background: #d1d5db; }
+        .btn-clue.used { background: #fee2e2; color: var(--danger); cursor: not-allowed; }
+        .btn-clue.locked { background: #fee2e2; color: var(--danger); cursor: not-allowed; opacity: 0.7; }
+        
+        .action-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+        .btn-submit { background: var(--primary); color: white; flex: 2; }
+        .btn-submit:hover:not(:disabled) { background: var(--primary-hover); }
+        .btn-giveup { background: transparent; color: var(--text-muted); border: 1px solid #d1d5db; flex: 1; }
+        .btn-giveup:hover:not(:disabled) { background: #f3f4f6; }
+        .btn-next { background: var(--success); color: white; width: 100%; margin-top: 16px; display: none; }
+        .btn-full-width { width: 100%; flex: none; }
+
+        /* Dialog / Modal */
+        dialog { margin: auto; border: none; padding: 24px; border-radius: 12px; max-width: 90%; width: 400px; box-shadow: 0 20px 25px rgba(0,0,0,0.15); outline: none; }
+        dialog::backdrop { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); }
+        .dialog-content { margin: 16px 0; font-size: 1.1rem; line-height: 1.5; }
+        .dialog-content img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin: 0 auto; }
+        .btn-close { background: var(--text); color: white; width: 100%; }
+
+        .hidden { display: none !important; }
+        
+        @media (max-width: 480px) {
+            .clues-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Start Screen -->
+    <div class="quiz-container" id="start-box">
+        <h2 style="font-size: 2rem; margin-bottom: 8px;">Interactive Quiz</h2>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">Test your knowledge!</p>
+        
+        <div class="instructions-card">
+            <strong>How to play:</strong>
+            <ul>
+                <li>Type your answer into the boxes. Incorrect guesses will cost you <strong>1 bonus point</strong>.</li>
+                <li>Stuck? You can reveal clues, but each will deduct from your available bonus.</li>
+                <li>Clues will lock automatically if they cost more than your remaining bonus.</li>
+                <li>If your bonus drops to zero and you guess incorrectly, you lose the round!</li>
+                <li>Get the answer right to score <strong>1 point + your remaining bonus points</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons" style="flex-direction: column; gap: 16px;">
+            <button class="btn-submit btn-full-width" onclick="startQuiz('questions.txt')">Play Quiz</button>
+            <button class="btn-giveup btn-full-width hidden" id="btn-demo" onclick="startQuiz('demo.txt')">Try Demo</button>
+        </div>
+    </div>
+
+    <!-- Main Quiz Interface -->
+    <div class="quiz-container hidden" id="quiz-box">
+        <header>
+            <span id="question-number">Question 1</span>
+            <span>Bonus: <span id="potential-points">5</span> pts</span>
+            <span>Score: <span id="total-score">0</span></span>
+        </header>
+
+        <h2 id="question-text">Loading question...</h2>
+
+        <div class="words-container" id="words-container"></div>
+
+        <div class="clues-grid" id="clues-container"></div>
+
+        <div class="action-buttons">
+            <button class="btn-giveup" id="btn-giveup" onclick="giveUp()">Give Up</button>
+            <button class="btn-submit" id="btn-submit" onclick="submitAnswer()">Submit Answer</button>
+        </div>
+        
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next Question →</button>
+    </div>
+
+    <!-- End Screen -->
+    <div class="quiz-container hidden" id="end-box">
+        <h2>Quiz Complete!</h2>
+        <p style="font-size: 1.25rem; margin-bottom: 20px;">Your final score is: <strong id="final-score">0</strong> points.</p>
+        <button class="btn-submit btn-full-width" onclick="location.reload()">Play Again</button>
+    </div>
+
+    <!-- Clue Modal -->
+    <dialog id="clue-dialog">
+        <h3 id="dialog-title">Clue</h3>
+        <div class="dialog-content" id="dialog-body"></div>
+        <button class="btn-close" onclick="document.getElementById('clue-dialog').close()">Close</button>
+    </dialog>
+
+    <script>
+        let questions = [];
+        let currentIdx = 0;
+        let totalScore = 0;
+        let currentPotential = 5;
+        let activeAnswer = ""; 
+
+        window.onload = async () => {
+            try {
+                const response = await fetch('demo.txt', { method: 'HEAD' });
+                if (response.ok) {
+                    document.getElementById('btn-demo').classList.remove('hidden');
+                }
+            } catch (err) {}
+        };
+
+        async function startQuiz(filename) {
+            document.getElementById('start-box').classList.add('hidden');
+            await loadQuestions(filename);
+            document.getElementById('quiz-box').classList.remove('hidden');
+        }
+
+        async function loadQuestions(filename) {
+            try {
+                const response = await fetch(filename);
+                const text = await response.text();
+                const blocks = text.split('---').map(b => b.trim()).filter(b => b.length > 0);
+
+                questions = blocks.map(block => {
+                    const lines = block.split('\n').map(l => l.trim());
+                    let qInfo = {}, clues = [];
+
+                    lines.forEach(line => {
+                        if (line.startsWith('Q:')) {
+                            const match = line.match(/Q:\s*(\d+)\s*\|\s*Question:\s*(.*?)\s*\|\s*Answer:\s*(.*?)\s*\|\s*Points:\s*(\d+)/i);
+                            if (match) qInfo = { num: match[1], text: match[2], answer: match[3].toUpperCase().trim(), startPoints: parseInt(match[4]) };
+                        } else if (line.startsWith('C:')) {
+                            const match = line.match(/C:\s*(\d+)\s*\|\s*Hint:\s*(.*?)\s*\|\s*Content:\s*(.*?)\s*\|\s*Points:\s*(\d+)(?:\s*\|\s*Blur:\s*(\d+))?/i);
+                            if (match) clues.push({ 
+                                hint: match[2], 
+                                content: match[3], 
+                                penalty: parseInt(match[4]),
+                                blur: match[5] ? parseInt(match[5]) : 0
+                            });
+                        }
+                    });
+                    return { ...qInfo, clues };
+                });
+
+                if (questions.length > 0) setupQuestion();
+            } catch (err) {
+                document.getElementById('question-text').innerText = `Error loading ${filename} file.`;
+                console.error(err);
+            }
+        }
+
+        function setupQuestion() {
+            const q = questions[currentIdx];
+            activeAnswer = q.answer;
+            currentPotential = q.startPoints; 
+            
+            document.getElementById('question-number').innerText = `Question ${q.num} / ${questions.length}`;
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('potential-points').innerText = currentPotential;
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-submit').disabled = false;
+            document.getElementById('btn-giveup').disabled = false;
+
+            const wordsContainer = document.getElementById('words-container');
+            wordsContainer.innerHTML = '';
+            
+            const words = activeAnswer.split(' ');
+            const maxWordLen = Math.max(...words.map(w => w.length));
+            
+            wordsContainer.style.setProperty('--max-letters', maxWordLen);
+            wordsContainer.style.setProperty('--total-gaps', `${(maxWordLen - 1) * 6}px`);
+
+            let globalInputIndex = 0;
+            const allInputs = [];
+            const cleanAnswer = activeAnswer.replace(/\s+/g, ''); 
+
+            words.forEach(word => {
+                const row = document.createElement('div');
+                row.className = 'word-row';
+
+                for (let i = 0; i < word.length; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.maxLength = 1;
+                    input.className = 'letter-box';
+                    input.dataset.index = globalInputIndex;
+                    
+                    allInputs.push(input);
+                    const currentIndex = globalInputIndex;
+
+                    input.addEventListener('input', (e) => {
+                        if (e.target.value.length === 1 && currentIndex < cleanAnswer.length - 1) {
+                            allInputs[currentIndex + 1].focus();
+                        }
+                    });
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && e.target.value.length === 0 && currentIndex > 0) {
+                            allInputs[currentIndex - 1].focus();
+                        }
+                    });
+
+                    row.appendChild(input);
+                    globalInputIndex++;
+                }
+                wordsContainer.appendChild(row);
+            });
+
+            const cluesContainer = document.getElementById('clues-container');
+            cluesContainer.innerHTML = '';
+            q.clues.forEach((clue, idx) => {
+                const card = document.createElement('div');
+                card.className = 'clue-card';
+                card.innerHTML = `
+                    <span class="clue-hint">${clue.hint}</span>
+                    <button class="btn-clue" id="clue-btn-${idx}" onclick="revealClue(${idx}, ${clue.penalty})">
+                        -${clue.penalty} Pts
+                    </button>
+                `;
+                cluesContainer.appendChild(card);
+            });
+
+            // Initial check to lock any clues that cost more than the starting points
+            updateClueState();
+        }
+
+        // NEW FUNCTION: Evaluates which clues the user can still afford
+        function updateClueState() {
+            const q = questions[currentIdx];
+            q.clues.forEach((clue, idx) => {
+                const btn = document.getElementById(`clue-btn-${idx}`);
+                if (btn && !btn.classList.contains('used')) {
+                    if (currentPotential < clue.penalty) {
+                        btn.classList.add('locked');
+                        btn.disabled = true;
+                        btn.innerText = "Locked";
+                    }
+                }
+            });
+        }
+
+        function revealClue(idx, penalty) {
+            const btn = document.getElementById(`clue-btn-${idx}`);
+            if (btn.classList.contains('used') || btn.classList.contains('locked')) return;
+
+            btn.classList.add('used');
+            btn.innerText = "Revealed";
+            btn.disabled = true;
+            
+            currentPotential -= penalty;
+            document.getElementById('potential-points').innerText = currentPotential;
+            
+            updateClueState();
+
+            const clueData = questions[currentIdx].clues[idx];
+            const content = clueData.content;
+            
+            // CHANGED: Update the dialog title to match the hint text
+            document.getElementById('dialog-title').innerText = clueData.hint;
+
+            const dialogBody = document.getElementById('dialog-body');
+            
+            if (content.startsWith('http://') || content.startsWith('https://')) {
+                const blurPixels = clueData.blur * 0.2;
+                dialogBody.innerHTML = `<img src="${content}" alt="Clue Image" style="filter: blur(${blurPixels}px);">`;
+            } else {
+                dialogBody.innerHTML = content;
+            }
+
+            document.getElementById('clue-dialog').showModal();
+        }
+        
+        function getEnteredAnswer() {
+            const inputs = document.querySelectorAll('.letter-box');
+            let userAns = "";
+            inputs.forEach(input => userAns += input.value.toUpperCase());
+            return userAns;
+        }
+
+        function submitAnswer() {
+            const userAns = getEnteredAnswer();
+            const cleanAnswer = activeAnswer.replace(/\s+/g, ''); 
+            const inputs = document.querySelectorAll('.letter-box');
+
+            if (userAns === cleanAnswer) {
+                inputs.forEach(input => input.classList.add('correct'));
+                totalScore += (1 + currentPotential);
+                endTurn();
+            } else {
+                currentPotential -= 1;
+                document.getElementById('potential-points').innerText = Math.max(0, currentPotential);
+                
+                // Re-evaluate remaining clues after a wrong answer deduction
+                updateClueState();
+
+                if (currentPotential < 0) {
+                    giveUp();
+                } else {
+                    const submitBtn = document.getElementById('btn-submit');
+                    submitBtn.disabled = true;
+                    
+                    inputs.forEach(input => {
+                        input.classList.add('wrong');
+                        input.disabled = true;
+                    });
+                    
+                    setTimeout(() => {
+                        inputs.forEach(input => {
+                            input.classList.remove('wrong');
+                            input.value = '';
+                            input.disabled = false;
+                        });
+                        submitBtn.disabled = false;
+                        
+                        if (inputs.length > 0) {
+                            inputs[0].focus();
+                        }
+                    }, 2500);
+                }
+            }
+        }
+
+        function giveUp() {
+            const cleanAnswer = activeAnswer.replace(/\s+/g, '');
+            const inputs = document.querySelectorAll('.letter-box');
+            for (let i = 0; i < cleanAnswer.length; i++) {
+                inputs[i].value = cleanAnswer[i];
+                inputs[i].classList.add('wrong');
+            }
+            currentPotential = 0;
+            endTurn();
+        }
+
+        function endTurn() {
+            document.getElementById('total-score').innerText = totalScore;
+            document.getElementById('btn-submit').disabled = true;
+            document.getElementById('btn-giveup').disabled = true;
+            
+            document.querySelectorAll('.btn-clue').forEach(b => b.disabled = true);
+            document.getElementById('btn-next').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < questions.length) {
+                setupQuestion();
+            } else {
+                document.getElementById('quiz-box').classList.add('hidden');
+                document.getElementById('end-box').classList.remove('hidden');
+                document.getElementById('final-score').innerText = totalScore;
+            }
+        }
+    </script>
+</body>
+</html>

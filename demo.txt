@@ -1,0 +1,12 @@
+Q: 1 | Question: African Country | Answer: EGYPT | Points: 5
+C: 1 | Hint: Landmark | Content: The Great Pyramids are in this country | Points: 2
+C: 2 | Hint: Flag | Content: https://cdn.britannica.com/85/185-004-1EA59040/Flag-Egypt.jpg | Points: 1 | Blur: 0
+C: 3 | Hint: Country Shape | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPZawCTXQS-E_BIj-lS59mIK0c8wIEoP7g4He-bOE4aUK4kZWuLheR0SXS&s=10 | Points: 2
+C: 4 | Hint: Capital | Content: Cairo | Points: 2
+---
+Q: 2 | Question: Famous Footballer | Answer: ERLING HAALAND | Points: 6
+C: 1 | Hint: Nationality | Content: He plays for the Norway national team. | Points: 1
+C: 2 | Hint: Goal Record | Content: He holds the record for the most goals scored in a single Premier League season. | Points: 2
+C: 3 | Hint: Current Club | Content: He wears the number 9 shirt for Manchester City. | Points: 1
+C: 4 | Hint: Photo (blurred) | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTN9NVkWAf_oCmW24S9Vg6183Q9gEZduyDTTFAiRoJO_7FE2Yl9LFXGfI3&s=10 | Points: 3 | Blur: 50
+---
