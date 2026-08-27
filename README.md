@@ -8,6 +8,7 @@ A lightweight, browser-based trivia quiz application built with vanilla HTML, CS
 * **Progressive Clues:** Players can reveal up to 4 clues per question. Clues cost "bonus points" to reveal and will lock automatically if the player cannot afford them.
 * **Rich Clue Formats:** Clues support standard text, embedded HTML tags (like `<b>` and `<i>`), and image URLs.
 * **Image Blurring:** Image clues can be partially obscured using a custom 0-100 blur factor.
+* **Dynamic Letter Reveal:** A special "Reveal letters" clue type lets players choose how many random letters they want to reveal for varying point costs. These revealed letters lock into place and are smartly skipped when the user is typing.
 * **Dynamic Scoring:** Players earn 1 base point for a correct answer, plus any remaining bonus points not spent on clues or incorrect guesses.
 * **Zero Dependencies:** Pure HTML, CSS, and JS in a single file.
 
@@ -52,7 +53,8 @@ Questions are stored in `questions.txt` using a custom, easy-to-read syntax sepa
 
 ### Syntax Rules
 * **Q Line:** `Q: [Number] | Question: [Question Text] | Answer: [ANSWER] | Points: [Bonus Points Available]`
-* **C Line:** `C: [Clue Number] | Hint: [Hint Title] | Content: [Clue Text, HTML, or Image URL] | Points: [Penalty Cost] | Blur: [0-100] (Optional)`
+* **C Line (Standard):** `C: [Clue Number] | Hint: [Hint Title] | Content: [Clue Text, HTML, or Image URL] | Points: [Penalty Cost] | Blur: [0-100] (Optional)`
+* **C Line (Reveal Letters):** To use the letter reveal mechanic, the Hint must be exactly `Reveal letters`. The Content must be a comma-separated list formatted as `letters:cost`. The Points value at the end can be set to `0` (the script dynamically calculates locking based on the cheapest choice in your list). Example: `C: 4 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0`
 
 ### Example Block
 
@@ -61,6 +63,6 @@ Q: 1 | Question: Classic 20th Century Novel | Answer: CATCH 22 | Points: 6
 C: 1 | Hint: Author | Content: It was written by American author <b>Joseph Heller</b> and first published in 1961. | Points: 1
 C: 2 | Hint: Setting | Content: It follows Captain John Yossarian, a bombardier stationed on the island of <i>Pianosa</i>. | Points: 1
 C: 3 | Hint: Title Meaning | Content: The title originated a famous idiom describing a <b>paradoxical situation</b>. | Points: 2
-C: 4 | Hint: Screen Adaptations | Content: [https://example.com/movie-poster.jpg](https://example.com/movie-poster.jpg) | Points: 1 | Blur: 50
+C: 4 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0
 ---
 ```

@@ -1,5 +1,5 @@
 Q: 1 | Question: Footballer | Answer: JORDAN PICKFORD | Points: 5
-C: 1 | Hint: Nationality | Content: English | Points: 1
+C: 1 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0
 C: 2 | Hint: Club | Content: Everton | Points: 1
 C: 3 | Hint: Picture (blurred) | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyTYNo6Eu9iXx8YuZsavgATWgX8ZAqCgNHem_oXQbQ8xGCCgXam2CV4W-L&s=10 | Points: 2 | Blur: 30
 C: 4 | Hint: Position | Content: Goalkeeper | Points: 2
@@ -12,9 +12,9 @@ C: 4 | Hint: Synopsis | Content: Jack Nicholson and Shelley Duvall star in this 
 ---
 Q: 3 | Question: Band | Answer: ARCTIC MONKEYS | Points: 5
 C: 1 | Hint: Famous Songs | Content: Some of their songs are:<br/>R U Mine<br/>Do I Wanna Know?<br/>Mardy Bum<br/>Fluorescent Adolescent | Points: 2
-C: 2 | Hint: Line Up | Content: Matt Helders<br/>Alex Turner<br/>Jamie Cook<br/>Nick O'Malley | Points: 1
+C: 2 | Hint: Reveal letters | Content: 2:1,4:2,5:3 | Points: 0
 C: 3 | Hint: Picture | Content: https://guitar.com/wp-content/uploads/2022/04/Arctic-Monkeys-Credit-Gabriel-Olsen-Getty-Images-for-Radio-com@2000x1500.jpg | Points: 1 | Blur: 0
-C: 4 | Hint: Hometown | Content: Tha band originates from Sheffield, UK | Points: 1
+C: 4 | Hint: Reveal | Content: Tha band originates from Sheffield, UK | Points: 1
 ---
 Q: 4 | Question: TV Show | Answer: PEEP SHOW | Points: 5
 C: 1 | Hint: Theme Tune | Content: The theme tune is the song Flagpole Sitta by Harvey Danger | Points: 1
@@ -23,14 +23,14 @@ C: 3 | Hint: Picture (blurred) | Content: https://encrypted-tbn0.gstatic.com/ima
 C: 4 | Hint: Famous Quote | Content: You’re not just a man any more – you are a man with a van. You get a van, we could be men with ven. | Points: 2
 ---
 Q: 5 | Question: Athlete | Answer: KEELY HODGKINSON | Points: 5
-C: 1 | Hint: Nationality | Content: British | Points: 1
+C: 1 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0
 C: 2 | Hint: Honours | Content: 2024 Olympic Gold<br/>2026 Indoor World Gold | Points: 1
 C: 3 | Hint: Picture (blurred) | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP4lrjOalyMaGRS-8hXMgCpiZZpuOXO-APIP2os97zyY5d4wVmequE_T4_&s=10 | Points: 2 | Blur: 35
-C: 4 | Hint: Event | Content: 800 metres | Points: 2
+C: 4 | Hint: Nationality and Event | Content: British 800 metres runner | Points: 2
 ---
 Q: 6 | Question: Landmark | Answer: STATUE OF LIBERTY | Points: 5
 C: 1 | Hint: Location | Content: New York | Points: 1
-C: 2 | Hint: Designer | Content: French sculptor Fredric Auguste Bartholdi | Points: 1
+C: 2 | Hint: Reveal letters | Content: 2:1,4:2,5:3 | Points: 0
 C: 3 | Hint: Picture (partial) | Content: https://as2.ftcdn.net/v2/jpg/05/30/07/81/1000_F_530078154_4s0TwkY2l0swyyRxIGihVCrSebWFrTHd.jpg | Points: 2 | Blur: 0
 C: 4 | Hint: Trivia | Content: Stands at a height of 93 metres and was gifted to the United States by France in 1886 to celebrate their independence | Points: 2
 ---
@@ -38,11 +38,11 @@ Q: 7 | Question: South American Country | Answer: COLOMBIA | Points: 5
 C: 1 | Hint: Captial City | Content: Bogota | Points: 2
 C: 2 | Hint: Flag | Content: https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Colombia.svg/960px-Flag_of_Colombia.svg.png?utm_source=tr.wikiquote.org&utm_campaign=index&utm_content=thumbnail | Points: 2
 C: 3 | Hint: Shape | Content: https://www.shutterstock.com/image-illustration/details-black-white-country-shape-260nw-167204306.jpg | Points: 1 | Blur: 0
-C: 4 | Hint: Trivia | Content: It is the only country in South America that has a coastline with the Pacific Ocean and the Caribbean Sea | Points: 1
+C: 4 | Hint: Trivia | Content: It is the only country in South America that has a coastline with the Pacific Ocean and the Caribbean Sea. Also, the 4th letter is O, not U | Points: 1
 ---
 Q: 8 | Question: TV Personality | Answer: CLAUDIA WINKLEMAN | Points: 5
 C: 1 | Hint: Fun Fact | Content: Her sister, Sophie, played Big Suze in Peep Show | Points: 1
-C: 2 | Hint: Age | Content: 54 | Points: 1
+C: 2 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0
 C: 3 | Hint: Picture (blurred) | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6mjM4CTBBhfLnNLj1HvA-nkSBRBZ8yes7_R9fj1biO80SPk2Hqvpt614&s=10 | Points: 2 | Blur: 35
 C: 4 | Hint: Known For | Content: A presenter on several prime-time TV shows, and a distinctive fringe | Points: 2
 ---
@@ -50,7 +50,7 @@ Q: 9 | Question: Song | Answer: THUNDER ROAD | Points: 5
 C: 1 | Hint: Artist | Content: Bruce Springsteen | Points: 2
 C: 2 | Hint: Album | Content: Opening track to the 1975 album Born To Run | Points: 1
 C: 3 | Hint: Lyrics | Content: <i>...Show a little faith there's magic in the night. You ain't a beauty but, hey, you're alright…</i> | Points: 1
-C: 4 | Hint: Trivia | Content: Andy's favourite song | Points: 2
+C: 4 | Hint: Reveal letters | Content: 2:1,3:2,4:3 | Points: 0
 ---
 Q: 10 | Question: Film | Answer: THE SOUND OF MUSIC | Points: 5
 C: 1 | Hint: Trivia | Content: Andy claims to have never watched this all the way through, to the disbelief of many | Points: 1
@@ -62,13 +62,13 @@ Q: 11 | Question: Album | Answer: DIFFERENT CLASS | Points: 6
 C: 1 | Hint: Artist | Content: Pulp | Points: 2
 C: 2 | Hint: Genre and release date | Content: Britpop album from 1995 thought by many to be the finest of the era | Points: 1
 C: 3 | Hint: Cover Art (blurred) | Content: https://m.media-amazon.com/images/I/71nB1PyUlJL.jpg | Points: 2 | Blur: 25
-C: 4 | Hint: Songs | Content: Included the songs<br/>Common People<br/>Disco 2000<br/>Sorted for E's and Whizz | Points: 2
+C: 4 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0
 ---
 Q: 12 | Question: Cyclist | Answer: BRADLEY WIGGINS | Points: 5
 C: 1 | Hint: Trivia | Content: First British cyclist to win the Tour de France (2012). Also won gold in the Olympic time trial in London later that year | Points: 2
 C: 2 | Hint: Awards | Content: Was Britain's most decorated Olympian, winning 8 medals, before Jason Kenny passed him in 2021 | Points: 1
 C: 3 | Hint: Picture | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlhKuLEdfhJnrY7th0bvIP6tVKqp8I6BMp9mbLO1zicA&s=10 | Points: 2 | Blur: 0
-C: 4 | Hint: Initials | Content: B _ _ _ _ _ _<br/>W _ _ _ _ _ _ | Points: 2
+C: 4 | Hint: Reveal letters | Content: 2:1,4:2,5:3 | Points: 0
 ---
 Q: 13 | Question: European Country | Answer: SLOVAKIA | Points: 5
 C: 1 | Hint: Capital | Content: Bratislava | Points: 1
@@ -78,19 +78,19 @@ C: 4 | Hint: Trivia | Content:  Most recently gained independence in 1993, follo
 ---
 Q: 14 | Question: Musician | Answer: TAYLOR SWIFT | Points: 5
 C: 1 | Hint: Trivia | Content: She was named after 1970s singing icon James Taylor | Points: 2
-C: 2 | Hint: Age | Content: She is 27 | Points: 1
+C: 2 | Hint: Reveal letters | Content: 2:1,4:2,5:3 | Points: 0
 C: 3 | Hint: Picture (blurred) | Content: https://cdn.britannica.com/37/252437-050-F21BD210/Taylor-Swift-performs-The-Eras-Tour-Sao-Paulo-Brazil-2023.jpg | Points: 2 | Blur: 35
 C: 4 | Hint: Childhood | Content: Grew up on a Christmas Tree farm in Pennsylvania, USA | Points: 1
 ---
 Q: 15 | Question: Landmark | Answer: PANAMA CANAL | Points: 5
 C: 1 | Hint: Trivia | Content: It is 82km long and connects the Atlantic and Pacific oceans | Points: 2
 C: 2 | Hint: Construction | Content: France began construction in 1881 but failed to complete it. The United States resumed construction in 1904, completing it in 1914 | Points: 1
-C: 3 | Hint: Picture | Content: https://www.geotech.hr/wp-content/uploads/2025/04/shutterstock_2363490055.jpg | Points: 1 | Blur: 0
+C: 3 | Hint: Reveal letters | Content: 2:1,4:2,5:3 | Points: 0
 C: 4 | Hint: Casualties | Content: It is estimated that 25,000 to 35,000 workers died during its consturction, mainly due to diseases spread by mosquitoes | Points: 1
 ---
 Q: 16 | Question: Comedian | Answer: HARRY HILL | Points: 5
 C: 1 | Hint: Real Name | Content: Matthew Hall | Points: 1
-C: 2 | Hint: Age | Content: He is 61 | Points: 1
+C: 2 | Hint: Reveal letters | Content: 2:1,3:2,4:3 | Points: 0
 C: 3 | Hint: Picture (blurred) | Content: https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/1b82ba2b-aff7-44e6-9afe-a57a5c42014d/dfuv46f-211cd4ed-efdc-4cd4-a3f5-e394c5ca4d26.png/v1/fill/w_1280,h_2112/harry_hill_render_by_kingevan210_dfuv46f-fullview.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MjExMiIsInBhdGgiOiIvZi8xYjgyYmEyYi1hZmY3LTQ0ZTYtOWFmZS1hNTdhNWM0MjAxNGQvZGZ1djQ2Zi0yMTFjZDRlZC1lZmRjLTRjZDQtYTNmNS1lMzk0YzVjYTRkMjYucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.u84PyriEI42xDoFiQVJ-f-NN5bOYM3Y5bOje6xPQEQQ | Points: 2 | Blur: 35
 C: 4 | Hint: Trivia | Content: Pursued a career as a slightly surrealist stand-up comedian despite being a qualified doctor | Points: 1
 ---
@@ -102,7 +102,7 @@ C: 4 | Hint: Cast | Content: A stellar cast, including Samuel L Jackson, Bruce W
 ---
 Q: 18 | Question: Historical Figure | Answer: OLIVER CROMWELL | Points: 5
 C: 1 | Hint: Life | Content: Born in Huntingdon, England in 1599. Died in 1658 and had a full state funeral. In 1661 his corpse was dug up, subjected to a symbolic execution, and his head was displayed on a pole | Points: 1
-C: 2 | Hint: Achievements | Content:  He co-founded the New Model Army, which promoted soldiers based on skill and discipline rather than social status | Points: 1
+C: 2 | Hint: Reveal letters | Content: 2:1,4:2,6:3 | Points: 0
 C: 3 | Hint: Picture | Content: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTLMTcwRGo55tG8Zp0cAOg10vULdfoOGHzsn6dWy9H-w&s=10 | Points: 1 | Blur: 0
 C: 4 | Hint: Trivia | Content: A devout puritan who effectively banned fun during his time as Lord Protector, a title he assumed after overthrowing the monarchy in 1649, temporarily turning Britain into a Republic | Points: 2
 ---

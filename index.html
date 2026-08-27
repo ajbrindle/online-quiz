@@ -24,6 +24,7 @@
         
         h2 { font-size: 1.5rem; margin-bottom: 20px; }
         
+        /* Instructions Card */
         .instructions-card {
             text-align: left;
             background: #f9fafb;
@@ -35,29 +36,12 @@
             color: var(--text-muted);
             line-height: 1.5;
         }
-        .instructions-card strong {
-            color: var(--text);
-            display: block;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-        .instructions-card ul {
-            padding-left: 20px;
-        }
-        .instructions-card li {
-            margin-bottom: 6px;
-        }
+        .instructions-card strong { color: var(--text); display: block; margin-bottom: 8px; font-size: 1rem; }
+        .instructions-card ul { padding-left: 20px; }
+        .instructions-card li { margin-bottom: 6px; }
+
         /* Word & Letter Input Layout */
-        .words-container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            margin-bottom: 24px; 
-            width: 100%; 
-            align-items: center; 
-            container-type: inline-size; 
-        }
-        
+        .words-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; width: 100%; align-items: center; container-type: inline-size; }
         .word-row { display: flex; gap: 6px; justify-content: center; width: 100%; flex-wrap: nowrap; }
         
         .letter-box { 
@@ -73,12 +57,14 @@
             border: 2px solid #d1d5db; 
             border-radius: 8px; 
             outline: none; 
-            transition: border-color 0.2s; 
+            transition: border-color 0.2s, background 0.2s; 
         }
         
         .letter-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         .letter-box.correct { border-color: var(--success); background: #ecfdf5; }
         .letter-box.wrong { border-color: var(--danger); background: #fef2f2; }
+        /* Style for randomly revealed hint letters */
+        .letter-box.revealed { border-color: var(--primary); background: #e0e7ff; color: var(--primary-hover); pointer-events: none; }
         .letter-box:disabled { opacity: 0.7; }
 
         /* Clues Section */
@@ -92,7 +78,7 @@
         button:disabled { cursor: not-allowed; opacity: 0.7; }
         .btn-clue { background: #e5e7eb; color: var(--text); }
         .btn-clue:hover:not(:disabled) { background: #d1d5db; }
-        .btn-clue.used { background: #fee2e2; color: var(--danger); cursor: not-allowed; }
+        .btn-clue.used { background: #d1fae5; color: var(--success); cursor: not-allowed; }
         .btn-clue.locked { background: #fee2e2; color: var(--danger); cursor: not-allowed; opacity: 0.7; }
         
         .action-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
@@ -131,7 +117,7 @@
                 <li>Stuck? You can reveal clues, but each will deduct from your available bonus.</li>
                 <li>Clues will lock automatically if they cost more than your remaining bonus.</li>
                 <li>If your bonus drops to zero and you guess incorrectly, you lose the round!</li>
-                <li>Get the answer right to score <strong>1 point + your remaining bonus points</strong>.</li>
+                <li>Get the answer right to score <strong>1 base point + your remaining bonus points</strong>.</li>
             </ul>
         </div>
 
@@ -150,9 +136,7 @@
         </header>
 
         <h2 id="question-text">Loading question...</h2>
-
         <div class="words-container" id="words-container"></div>
-
         <div class="clues-grid" id="clues-container"></div>
 
         <div class="action-buttons">
@@ -258,6 +242,21 @@
             const allInputs = [];
             const cleanAnswer = activeAnswer.replace(/\s+/g, ''); 
 
+            // Helpers to skip over ReadOnly/Revealed fields when navigating
+            const getNextInput = (curr) => {
+                for(let i = curr + 1; i < allInputs.length; i++) {
+                    if (!allInputs[i].readOnly) return allInputs[i];
+                }
+                return null;
+            };
+
+            const getPrevInput = (curr) => {
+                for(let i = curr - 1; i >= 0; i--) {
+                    if (!allInputs[i].readOnly) return allInputs[i];
+                }
+                return null;
+            };
+
             words.forEach(word => {
                 const row = document.createElement('div');
                 row.className = 'word-row';
@@ -273,14 +272,17 @@
                     const currentIndex = globalInputIndex;
 
                     input.addEventListener('input', (e) => {
-                        if (e.target.value.length === 1 && currentIndex < cleanAnswer.length - 1) {
-                            allInputs[currentIndex + 1].focus();
+                        if (e.target.value.length === 1) {
+                            const next = getNextInput(currentIndex);
+                            if (next) next.focus();
                         }
                     });
 
                     input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Backspace' && e.target.value.length === 0 && currentIndex > 0) {
-                            allInputs[currentIndex - 1].focus();
+                        if (e.key === 'Backspace' && e.target.value.length === 0) {
+                            e.preventDefault();
+                            const prev = getPrevInput(currentIndex);
+                            if (prev) prev.focus();
                         }
                     });
 
@@ -290,31 +292,44 @@
                 wordsContainer.appendChild(row);
             });
 
+            // Generate Clues UI
             const cluesContainer = document.getElementById('clues-container');
             cluesContainer.innerHTML = '';
             q.clues.forEach((clue, idx) => {
                 const card = document.createElement('div');
                 card.className = 'clue-card';
+                
+                let pointsLabel = `-${clue.penalty} Pts`;
+                if (clue.hint === 'Reveal letters') {
+                    pointsLabel = "Cost varies";
+                }
+
                 card.innerHTML = `
                     <span class="clue-hint">${clue.hint}</span>
                     <button class="btn-clue" id="clue-btn-${idx}" onclick="revealClue(${idx}, ${clue.penalty})">
-                        -${clue.penalty} Pts
+                        ${pointsLabel}
                     </button>
                 `;
                 cluesContainer.appendChild(card);
             });
 
-            // Initial check to lock any clues that cost more than the starting points
             updateClueState();
         }
 
-        // NEW FUNCTION: Evaluates which clues the user can still afford
         function updateClueState() {
             const q = questions[currentIdx];
             q.clues.forEach((clue, idx) => {
                 const btn = document.getElementById(`clue-btn-${idx}`);
                 if (btn && !btn.classList.contains('used')) {
-                    if (currentPotential < clue.penalty) {
+                    let requiredPoints = clue.penalty;
+                    
+                    // If it's a letters clue, find the cheapest option to determine locking
+                    if (clue.hint === 'Reveal letters') {
+                        const options = clue.content.split(',').map(opt => parseInt(opt.split(':')[1]));
+                        requiredPoints = Math.min(...options);
+                    }
+                    
+                    if (currentPotential < requiredPoints) {
                         btn.classList.add('locked');
                         btn.disabled = true;
                         btn.innerText = "Locked";
@@ -327,22 +342,37 @@
             const btn = document.getElementById(`clue-btn-${idx}`);
             if (btn.classList.contains('used') || btn.classList.contains('locked')) return;
 
+            const clueData = questions[currentIdx].clues[idx];
+            const content = clueData.content;
+            const dialogBody = document.getElementById('dialog-body');
+            document.getElementById('dialog-title').innerText = clueData.hint;
+
+            // INTERCEPT: Reveal Letters Modal injection
+            if (clueData.hint === 'Reveal letters') {
+                const options = content.split(',').map(opt => {
+                    const parts = opt.split(':');
+                    return { letters: parseInt(parts[0]), cost: parseInt(parts[1]) };
+                });
+                
+                let html = `<p style="margin-bottom:16px;">Choose how many letters to reveal:</p><div style="display:flex;flex-direction:column;gap:10px;">`;
+                options.forEach(opt => {
+                    const disabled = currentPotential < opt.cost ? 'disabled' : '';
+                    html += `<button class="btn-submit" ${disabled} onclick="applyReveal(${idx}, ${opt.letters}, ${opt.cost})">Reveal ${opt.letters} letters (-${opt.cost} pts)</button>`;
+                });
+                html += `</div>`;
+                dialogBody.innerHTML = html;
+                document.getElementById('clue-dialog').showModal();
+                return; // Early exit so we don't deduct points yet!
+            }
+
+            // Standard Clue Action
             btn.classList.add('used');
             btn.innerText = "Revealed";
             btn.disabled = true;
             
             currentPotential -= penalty;
             document.getElementById('potential-points').innerText = currentPotential;
-            
             updateClueState();
-
-            const clueData = questions[currentIdx].clues[idx];
-            const content = clueData.content;
-            
-            // CHANGED: Update the dialog title to match the hint text
-            document.getElementById('dialog-title').innerText = clueData.hint;
-
-            const dialogBody = document.getElementById('dialog-body');
             
             if (content.startsWith('http://') || content.startsWith('https://')) {
                 const blurPixels = clueData.blur * 0.2;
@@ -353,7 +383,36 @@
 
             document.getElementById('clue-dialog').showModal();
         }
-        
+
+        // TRIGGERED FROM DIALOG: Actually apply the randomly selected letters
+        window.applyReveal = function(clueIdx, numLetters, cost) {
+            document.getElementById('clue-dialog').close();
+            
+            const btn = document.getElementById(`clue-btn-${clueIdx}`);
+            btn.classList.add('used');
+            btn.innerText = "Revealed";
+            btn.disabled = true;
+            
+            currentPotential -= cost;
+            document.getElementById('potential-points').innerText = Math.max(0, currentPotential);
+            
+            const cleanAnswer = activeAnswer.replace(/\s+/g, '');
+            const inputs = Array.from(document.querySelectorAll('.letter-box'));
+            
+            // Only select from inputs that aren't already revealed
+            const availableInputs = inputs.filter(input => !input.readOnly);
+            const shuffled = availableInputs.sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, numLetters);
+            
+            selected.forEach(input => {
+                input.value = cleanAnswer[input.dataset.index];
+                input.readOnly = true;
+                input.classList.add('revealed');
+            });
+            
+            updateClueState();
+        };
+
         function getEnteredAnswer() {
             const inputs = document.querySelectorAll('.letter-box');
             let userAns = "";
@@ -373,32 +432,33 @@
             } else {
                 currentPotential -= 1;
                 document.getElementById('potential-points').innerText = Math.max(0, currentPotential);
-                
-                // Re-evaluate remaining clues after a wrong answer deduction
                 updateClueState();
 
-                if (currentPotential < 0) {
+                if (currentPotential <= 0) {
                     giveUp();
                 } else {
                     const submitBtn = document.getElementById('btn-submit');
                     submitBtn.disabled = true;
                     
                     inputs.forEach(input => {
-                        input.classList.add('wrong');
-                        input.disabled = true;
+                        if (!input.readOnly) {
+                            input.classList.add('wrong');
+                            input.disabled = true;
+                        }
                     });
                     
                     setTimeout(() => {
                         inputs.forEach(input => {
-                            input.classList.remove('wrong');
-                            input.value = '';
-                            input.disabled = false;
+                            if (!input.readOnly) {
+                                input.classList.remove('wrong');
+                                input.value = '';
+                                input.disabled = false;
+                            }
                         });
                         submitBtn.disabled = false;
                         
-                        if (inputs.length > 0) {
-                            inputs[0].focus();
-                        }
+                        const firstAvailable = Array.from(inputs).find(inp => !inp.readOnly);
+                        if (firstAvailable) firstAvailable.focus();
                     }, 2500);
                 }
             }
@@ -408,8 +468,10 @@
             const cleanAnswer = activeAnswer.replace(/\s+/g, '');
             const inputs = document.querySelectorAll('.letter-box');
             for (let i = 0; i < cleanAnswer.length; i++) {
-                inputs[i].value = cleanAnswer[i];
-                inputs[i].classList.add('wrong');
+                if (!inputs[i].readOnly) {
+                    inputs[i].value = cleanAnswer[i];
+                    inputs[i].classList.add('wrong');
+                }
             }
             currentPotential = 0;
             endTurn();
