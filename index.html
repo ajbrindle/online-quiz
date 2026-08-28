@@ -24,20 +24,10 @@
         
         h2 { font-size: 1.5rem; margin-bottom: 20px; }
         
-        /* Instructions Card */
-        .instructions-card {
-            text-align: left;
-            background: #f9fafb;
-            padding: 16px 20px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 24px;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
+        /* Instructions & Upload Card */
+        .instructions-card { text-align: left; background: #f9fafb; padding: 16px 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
         .instructions-card strong { color: var(--text); display: block; margin-bottom: 8px; font-size: 1rem; }
-        .instructions-card ul { padding-left: 20px; }
+        .instructions-card ul { padding-left: 20px; margin-bottom: 0; }
         .instructions-card li { margin-bottom: 6px; }
 
         /* Word & Letter Input Layout */
@@ -46,24 +36,15 @@
         
         .letter-box { 
             width: min(45px, calc((100% - var(--total-gaps)) / var(--max-letters))); 
-            aspect-ratio: 1;
-            height: auto;
-            min-width: 0; 
-            padding: 0;
-            text-align: center; 
+            aspect-ratio: 1; height: auto; min-width: 0; padding: 0; text-align: center; 
             font-size: min(1.25rem, calc((100cqw / var(--max-letters)) * 0.55)); 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            border: 2px solid #d1d5db; 
-            border-radius: 8px; 
-            outline: none; 
-            transition: border-color 0.2s, background 0.2s; 
+            font-weight: bold; text-transform: uppercase; border: 2px solid #d1d5db; 
+            border-radius: 8px; outline: none; transition: border-color 0.2s, background 0.2s; 
         }
         
         .letter-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         .letter-box.correct { border-color: var(--success); background: #ecfdf5; }
         .letter-box.wrong { border-color: var(--danger); background: #fef2f2; }
-        /* Style for randomly revealed hint letters */
         .letter-box.revealed { border-color: var(--primary); background: #e0e7ff; color: var(--primary-hover); pointer-events: none; }
         .letter-box:disabled { opacity: 0.7; }
 
@@ -108,21 +89,21 @@
     <!-- Start Screen -->
     <div class="quiz-container" id="start-box">
         <h2 style="font-size: 2rem; margin-bottom: 8px;">Interactive Quiz</h2>
-        <p style="margin-bottom: 20px; color: var(--text-muted);">Test your knowledge!</p>
         
         <div class="instructions-card">
             <strong>How to play:</strong>
             <ul>
-                <li>Type your answer into the boxes. Incorrect guesses will cost you <strong>1 bonus point</strong>.</li>
-                <li>Stuck? You can reveal clues, but each will deduct from your available bonus.</li>
-                <li>Clues will lock automatically if they cost more than your remaining bonus.</li>
-                <li>If your bonus drops to zero and you guess incorrectly, you lose the round!</li>
-                <li>Get the answer right to score <strong>1 base point + your remaining bonus points</strong>.</li>
+                <li>Type your answer into the boxes. Incorrect guesses cost <strong>1 bonus point</strong>.</li>
+                <li>Stuck? Reveal clues for a cost. Clues lock if you can't afford them.</li>
+                <li>Get the answer right to score <strong>1 base point + remaining bonus points</strong>.</li>
             </ul>
         </div>
 
-        <div class="action-buttons" style="flex-direction: column; gap: 16px;">
-            <button class="btn-submit btn-full-width" onclick="startQuiz('questions.txt')">Play Quiz</button>
+        <p style="margin-bottom: 12px; color: var(--text-muted); font-weight: bold;">Select a Pack:</p>
+        <div class="action-buttons" id="quiz-packs" style="flex-direction: column; gap: 12px;"></div>
+        
+        <div class="action-buttons" style="flex-direction: column; gap: 12px; margin-top: 24px;">
+            <button class="btn-giveup btn-full-width" onclick="window.location.href='upload.html'">Upload New Pack</button>
             <button class="btn-giveup btn-full-width hidden" id="btn-demo" onclick="startQuiz('demo.txt')">Try Demo</button>
         </div>
     </div>
@@ -151,7 +132,7 @@
     <div class="quiz-container hidden" id="end-box">
         <h2>Quiz Complete!</h2>
         <p style="font-size: 1.25rem; margin-bottom: 20px;">Your final score is: <strong id="final-score">0</strong> points.</p>
-        <button class="btn-submit btn-full-width" onclick="location.reload()">Play Again</button>
+        <button class="btn-submit btn-full-width" onclick="location.reload()">Return to Menu</button>
     </div>
 
     <!-- Clue Modal -->
@@ -169,6 +150,8 @@
         let activeAnswer = ""; 
 
         window.onload = async () => {
+            loadPacksList();
+
             try {
                 const response = await fetch('demo.txt', { method: 'HEAD' });
                 if (response.ok) {
@@ -176,6 +159,30 @@
                 }
             } catch (err) {}
         };
+
+        async function loadPacksList() {
+            const packsContainer = document.getElementById('quiz-packs');
+            packsContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch('api.php?action=list');
+                const data = await response.json();
+                
+                if (data.success && data.packs.length > 0) {
+                    data.packs.forEach(pack => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-submit btn-full-width';
+                        btn.innerText = `Play: ${pack.title}`;
+                        btn.onclick = () => startQuiz(pack.file);
+                        packsContainer.appendChild(btn);
+                    });
+                } else {
+                    packsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No question packs found. Upload one below!</p>';
+                }
+            } catch (err) {
+                packsContainer.innerHTML = '<p style="color: var(--danger); font-size: 0.9rem;">Error connecting to api.php</p>';
+            }
+        }
 
         async function startQuiz(filename) {
             document.getElementById('start-box').classList.add('hidden');
@@ -186,7 +193,14 @@
         async function loadQuestions(filename) {
             try {
                 const response = await fetch(filename);
-                const text = await response.text();
+                let text = await response.text();
+                
+                if (!text.trim().startsWith('Q:')) {
+                    const lines = text.split('\n');
+                    lines.shift(); 
+                    text = lines.join('\n');
+                }
+
                 const blocks = text.split('---').map(b => b.trim()).filter(b => b.length > 0);
 
                 questions = blocks.map(block => {
@@ -242,7 +256,6 @@
             const allInputs = [];
             const cleanAnswer = activeAnswer.replace(/\s+/g, ''); 
 
-            // Helpers to skip over ReadOnly/Revealed fields when navigating
             const getNextInput = (curr) => {
                 for(let i = curr + 1; i < allInputs.length; i++) {
                     if (!allInputs[i].readOnly) return allInputs[i];
@@ -292,7 +305,6 @@
                 wordsContainer.appendChild(row);
             });
 
-            // Generate Clues UI
             const cluesContainer = document.getElementById('clues-container');
             cluesContainer.innerHTML = '';
             q.clues.forEach((clue, idx) => {
@@ -323,7 +335,6 @@
                 if (btn && !btn.classList.contains('used')) {
                     let requiredPoints = clue.penalty;
                     
-                    // If it's a letters clue, find the cheapest option to determine locking
                     if (clue.hint === 'Reveal letters') {
                         const options = clue.content.split(',').map(opt => parseInt(opt.split(':')[1]));
                         requiredPoints = Math.min(...options);
@@ -347,7 +358,6 @@
             const dialogBody = document.getElementById('dialog-body');
             document.getElementById('dialog-title').innerText = clueData.hint;
 
-            // INTERCEPT: Reveal Letters Modal injection
             if (clueData.hint === 'Reveal letters') {
                 const options = content.split(',').map(opt => {
                     const parts = opt.split(':');
@@ -362,10 +372,9 @@
                 html += `</div>`;
                 dialogBody.innerHTML = html;
                 document.getElementById('clue-dialog').showModal();
-                return; // Early exit so we don't deduct points yet!
+                return; 
             }
 
-            // Standard Clue Action
             btn.classList.add('used');
             btn.innerText = "Revealed";
             btn.disabled = true;
@@ -384,7 +393,6 @@
             document.getElementById('clue-dialog').showModal();
         }
 
-        // TRIGGERED FROM DIALOG: Actually apply the randomly selected letters
         window.applyReveal = function(clueIdx, numLetters, cost) {
             document.getElementById('clue-dialog').close();
             
@@ -399,7 +407,6 @@
             const cleanAnswer = activeAnswer.replace(/\s+/g, '');
             const inputs = Array.from(document.querySelectorAll('.letter-box'));
             
-            // Only select from inputs that aren't already revealed
             const availableInputs = inputs.filter(input => !input.readOnly);
             const shuffled = availableInputs.sort(() => 0.5 - Math.random());
             const selected = shuffled.slice(0, numLetters);
