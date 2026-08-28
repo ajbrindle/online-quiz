@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Quiz Pack</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --background: #f3f4f6;
+            --surface: #ffffff;
+            --text: #1f2937;
+            --text-muted: #4b5563;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+        body { background: var(--background); color: var(--text); padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .quiz-container { background: var(--surface); width: 100%; max-width: 600px; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        
+        h2 { font-size: 1.5rem; margin-bottom: 20px; }
+        
+        .instructions-card { text-align: left; background: #f9fafb; padding: 16px 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
+        .instructions-card strong { color: var(--text); display: block; margin-bottom: 8px; font-size: 1rem; }
+        
+        button { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; font-size: 0.95rem; }
+        button:active { transform: scale(0.98); }
+        .btn-submit { background: var(--primary); color: white; width: 100%; }
+        .btn-submit:hover { background: var(--primary-hover); }
+        .btn-giveup { background: transparent; color: var(--text-muted); border: 1px solid #d1d5db; width: 100%; margin-top: 16px; }
+        .btn-giveup:hover { background: #f3f4f6; }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h2>Upload Question Pack</h2>
+        
+        <div class="instructions-card">
+            <strong>Select a .txt file:</strong>
+            <p style="font-size: 0.85rem; margin-bottom: 12px;">File name must begin with 'q'.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <input type="password" id="upload-password" placeholder="Enter upload password" style="border: 1px solid #d1d5db; border-radius: 4px; padding: 8px; width: 100%; box-sizing: border-box;" />
+                <input type="file" id="file-upload" accept=".txt" style="border: 1px solid #d1d5db; border-radius: 4px; padding: 8px; width: 100%; box-sizing: border-box;" />
+                <button class="btn-submit" onclick="uploadPack()">Upload</button>
+            </div>
+            
+            <p id="upload-status" style="font-size: 0.85rem; margin-top: 12px; color: var(--text-muted); margin-bottom: 0; font-weight: bold;"></p>
+        </div>
+
+        <button class="btn-giveup" onclick="window.location.href='index.html'">← Back to Menu</button>
+    </div>
+
+    <script>
+        async function uploadPack() {
+            const fileInput = document.getElementById('file-upload');
+            const passwordInput = document.getElementById('upload-password').value;
+            const statusText = document.getElementById('upload-status');
+            
+            if (!passwordInput) {
+                statusText.innerText = "Please enter the password.";
+                statusText.style.color = "var(--danger)";
+                return;
+            }
+
+            if (!fileInput.files.length) {
+                statusText.innerText = "Please select a file first.";
+                statusText.style.color = "var(--danger)";
+                return;
+            }
+
+            const file = fileInput.files[0];
+            if (!file.name.toLowerCase().startsWith('q') || !file.name.toLowerCase().endsWith('.txt')) {
+                statusText.innerText = "File must start with 'q' and end with '.txt'.";
+                statusText.style.color = "var(--danger)";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pack', file);
+            formData.append('password', passwordInput);
+            formData.append('action', 'upload');
+
+            statusText.innerText = "Uploading...";
+            statusText.style.color = "var(--text-muted)";
+
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusText.innerText = "Upload successful! You can now return to the menu.";
+                    statusText.style.color = "var(--success)";
+                    fileInput.value = ""; 
+                    document.getElementById('upload-password').value = ""; 
+                } else {
+                    statusText.innerText = data.message;
+                    statusText.style.color = "var(--danger)";
+                }
+            } catch (err) {
+                statusText.innerText = "Upload failed. Check server logs.";
+                statusText.style.color = "var(--danger)";
+            }
+        }
+    </script>
+</body>
+</html>

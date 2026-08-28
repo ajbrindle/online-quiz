@@ -24,61 +24,28 @@
         
         h2 { font-size: 1.5rem; margin-bottom: 20px; }
         
-        .instructions-card {
-            text-align: left;
-            background: #f9fafb;
-            padding: 16px 20px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 24px;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-        .instructions-card strong {
-            color: var(--text);
-            display: block;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-        .instructions-card ul {
-            padding-left: 20px;
-        }
-        .instructions-card li {
-            margin-bottom: 6px;
-        }
+        /* Instructions & Upload Card */
+        .instructions-card { text-align: left; background: #f9fafb; padding: 16px 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
+        .instructions-card strong { color: var(--text); display: block; margin-bottom: 8px; font-size: 1rem; }
+        .instructions-card ul { padding-left: 20px; margin-bottom: 0; }
+        .instructions-card li { margin-bottom: 6px; }
+
         /* Word & Letter Input Layout */
-        .words-container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            margin-bottom: 24px; 
-            width: 100%; 
-            align-items: center; 
-            container-type: inline-size; 
-        }
-        
+        .words-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; width: 100%; align-items: center; container-type: inline-size; }
         .word-row { display: flex; gap: 6px; justify-content: center; width: 100%; flex-wrap: nowrap; }
         
         .letter-box { 
             width: min(45px, calc((100% - var(--total-gaps)) / var(--max-letters))); 
-            aspect-ratio: 1;
-            height: auto;
-            min-width: 0; 
-            padding: 0;
-            text-align: center; 
+            aspect-ratio: 1; height: auto; min-width: 0; padding: 0; text-align: center; 
             font-size: min(1.25rem, calc((100cqw / var(--max-letters)) * 0.55)); 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            border: 2px solid #d1d5db; 
-            border-radius: 8px; 
-            outline: none; 
-            transition: border-color 0.2s; 
+            font-weight: bold; text-transform: uppercase; border: 2px solid #d1d5db; 
+            border-radius: 8px; outline: none; transition: border-color 0.2s, background 0.2s; 
         }
         
         .letter-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
         .letter-box.correct { border-color: var(--success); background: #ecfdf5; }
         .letter-box.wrong { border-color: var(--danger); background: #fef2f2; }
+        .letter-box.revealed { border-color: var(--primary); background: #e0e7ff; color: var(--primary-hover); pointer-events: none; }
         .letter-box:disabled { opacity: 0.7; }
 
         /* Clues Section */
@@ -92,7 +59,7 @@
         button:disabled { cursor: not-allowed; opacity: 0.7; }
         .btn-clue { background: #e5e7eb; color: var(--text); }
         .btn-clue:hover:not(:disabled) { background: #d1d5db; }
-        .btn-clue.used { background: #fee2e2; color: var(--danger); cursor: not-allowed; }
+        .btn-clue.used { background: #d1fae5; color: var(--success); cursor: not-allowed; }
         .btn-clue.locked { background: #fee2e2; color: var(--danger); cursor: not-allowed; opacity: 0.7; }
         
         .action-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
@@ -122,21 +89,21 @@
     <!-- Start Screen -->
     <div class="quiz-container" id="start-box">
         <h2 style="font-size: 2rem; margin-bottom: 8px;">Interactive Quiz</h2>
-        <p style="margin-bottom: 20px; color: var(--text-muted);">Test your knowledge!</p>
         
         <div class="instructions-card">
             <strong>How to play:</strong>
             <ul>
-                <li>Type your answer into the boxes. Incorrect guesses will cost you <strong>1 bonus point</strong>.</li>
-                <li>Stuck? You can reveal clues, but each will deduct from your available bonus.</li>
-                <li>Clues will lock automatically if they cost more than your remaining bonus.</li>
-                <li>If your bonus drops to zero and you guess incorrectly, you lose the round!</li>
-                <li>Get the answer right to score <strong>1 point + your remaining bonus points</strong>.</li>
+                <li>Type your answer into the boxes. Incorrect guesses cost <strong>1 bonus point</strong>.</li>
+                <li>Stuck? Reveal clues for a cost. Clues lock if you can't afford them.</li>
+                <li>Get the answer right to score <strong>1 base point + remaining bonus points</strong>.</li>
             </ul>
         </div>
 
-        <div class="action-buttons" style="flex-direction: column; gap: 16px;">
-            <button class="btn-submit btn-full-width" onclick="startQuiz('questions.txt')">Play Quiz</button>
+        <p style="margin-bottom: 12px; color: var(--text-muted); font-weight: bold;">Select a Pack:</p>
+        <div class="action-buttons" id="quiz-packs" style="flex-direction: column; gap: 12px;"></div>
+        
+        <div class="action-buttons" style="flex-direction: column; gap: 12px; margin-top: 24px;">
+            <button class="btn-giveup btn-full-width" onclick="window.location.href='upload.html'">Upload New Pack</button>
             <button class="btn-giveup btn-full-width hidden" id="btn-demo" onclick="startQuiz('demo.txt')">Try Demo</button>
         </div>
     </div>
@@ -150,9 +117,7 @@
         </header>
 
         <h2 id="question-text">Loading question...</h2>
-
         <div class="words-container" id="words-container"></div>
-
         <div class="clues-grid" id="clues-container"></div>
 
         <div class="action-buttons">
@@ -167,7 +132,7 @@
     <div class="quiz-container hidden" id="end-box">
         <h2>Quiz Complete!</h2>
         <p style="font-size: 1.25rem; margin-bottom: 20px;">Your final score is: <strong id="final-score">0</strong> points.</p>
-        <button class="btn-submit btn-full-width" onclick="location.reload()">Play Again</button>
+        <button class="btn-submit btn-full-width" onclick="location.reload()">Return to Menu</button>
     </div>
 
     <!-- Clue Modal -->
@@ -185,6 +150,8 @@
         let activeAnswer = ""; 
 
         window.onload = async () => {
+            loadPacksList();
+
             try {
                 const response = await fetch('demo.txt', { method: 'HEAD' });
                 if (response.ok) {
@@ -192,6 +159,30 @@
                 }
             } catch (err) {}
         };
+
+        async function loadPacksList() {
+            const packsContainer = document.getElementById('quiz-packs');
+            packsContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch('api.php?action=list');
+                const data = await response.json();
+                
+                if (data.success && data.packs.length > 0) {
+                    data.packs.forEach(pack => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-submit btn-full-width';
+                        btn.innerText = `Play: ${pack.title}`;
+                        btn.onclick = () => startQuiz(pack.file);
+                        packsContainer.appendChild(btn);
+                    });
+                } else {
+                    packsContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No question packs found. Upload one below!</p>';
+                }
+            } catch (err) {
+                packsContainer.innerHTML = '<p style="color: var(--danger); font-size: 0.9rem;">Error connecting to api.php</p>';
+            }
+        }
 
         async function startQuiz(filename) {
             document.getElementById('start-box').classList.add('hidden');
@@ -202,7 +193,14 @@
         async function loadQuestions(filename) {
             try {
                 const response = await fetch(filename);
-                const text = await response.text();
+                let text = await response.text();
+                
+                if (!text.trim().startsWith('Q:')) {
+                    const lines = text.split('\n');
+                    lines.shift(); 
+                    text = lines.join('\n');
+                }
+
                 const blocks = text.split('---').map(b => b.trim()).filter(b => b.length > 0);
 
                 questions = blocks.map(block => {
@@ -258,6 +256,20 @@
             const allInputs = [];
             const cleanAnswer = activeAnswer.replace(/\s+/g, ''); 
 
+            const getNextInput = (curr) => {
+                for(let i = curr + 1; i < allInputs.length; i++) {
+                    if (!allInputs[i].readOnly) return allInputs[i];
+                }
+                return null;
+            };
+
+            const getPrevInput = (curr) => {
+                for(let i = curr - 1; i >= 0; i--) {
+                    if (!allInputs[i].readOnly) return allInputs[i];
+                }
+                return null;
+            };
+
             words.forEach(word => {
                 const row = document.createElement('div');
                 row.className = 'word-row';
@@ -273,14 +285,17 @@
                     const currentIndex = globalInputIndex;
 
                     input.addEventListener('input', (e) => {
-                        if (e.target.value.length === 1 && currentIndex < cleanAnswer.length - 1) {
-                            allInputs[currentIndex + 1].focus();
+                        if (e.target.value.length === 1) {
+                            const next = getNextInput(currentIndex);
+                            if (next) next.focus();
                         }
                     });
 
                     input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Backspace' && e.target.value.length === 0 && currentIndex > 0) {
-                            allInputs[currentIndex - 1].focus();
+                        if (e.key === 'Backspace' && e.target.value.length === 0) {
+                            e.preventDefault();
+                            const prev = getPrevInput(currentIndex);
+                            if (prev) prev.focus();
                         }
                     });
 
@@ -295,26 +310,37 @@
             q.clues.forEach((clue, idx) => {
                 const card = document.createElement('div');
                 card.className = 'clue-card';
+                
+                let pointsLabel = `-${clue.penalty} Pts`;
+                if (clue.hint === 'Reveal letters') {
+                    pointsLabel = "Cost varies";
+                }
+
                 card.innerHTML = `
                     <span class="clue-hint">${clue.hint}</span>
                     <button class="btn-clue" id="clue-btn-${idx}" onclick="revealClue(${idx}, ${clue.penalty})">
-                        -${clue.penalty} Pts
+                        ${pointsLabel}
                     </button>
                 `;
                 cluesContainer.appendChild(card);
             });
 
-            // Initial check to lock any clues that cost more than the starting points
             updateClueState();
         }
 
-        // NEW FUNCTION: Evaluates which clues the user can still afford
         function updateClueState() {
             const q = questions[currentIdx];
             q.clues.forEach((clue, idx) => {
                 const btn = document.getElementById(`clue-btn-${idx}`);
                 if (btn && !btn.classList.contains('used')) {
-                    if (currentPotential < clue.penalty) {
+                    let requiredPoints = clue.penalty;
+                    
+                    if (clue.hint === 'Reveal letters') {
+                        const options = clue.content.split(',').map(opt => parseInt(opt.split(':')[1]));
+                        requiredPoints = Math.min(...options);
+                    }
+                    
+                    if (currentPotential < requiredPoints) {
                         btn.classList.add('locked');
                         btn.disabled = true;
                         btn.innerText = "Locked";
@@ -327,22 +353,35 @@
             const btn = document.getElementById(`clue-btn-${idx}`);
             if (btn.classList.contains('used') || btn.classList.contains('locked')) return;
 
+            const clueData = questions[currentIdx].clues[idx];
+            const content = clueData.content;
+            const dialogBody = document.getElementById('dialog-body');
+            document.getElementById('dialog-title').innerText = clueData.hint;
+
+            if (clueData.hint === 'Reveal letters') {
+                const options = content.split(',').map(opt => {
+                    const parts = opt.split(':');
+                    return { letters: parseInt(parts[0]), cost: parseInt(parts[1]) };
+                });
+                
+                let html = `<p style="margin-bottom:16px;">Choose how many letters to reveal:</p><div style="display:flex;flex-direction:column;gap:10px;">`;
+                options.forEach(opt => {
+                    const disabled = currentPotential < opt.cost ? 'disabled' : '';
+                    html += `<button class="btn-submit" ${disabled} onclick="applyReveal(${idx}, ${opt.letters}, ${opt.cost})">Reveal ${opt.letters} letters (-${opt.cost} pts)</button>`;
+                });
+                html += `</div>`;
+                dialogBody.innerHTML = html;
+                document.getElementById('clue-dialog').showModal();
+                return; 
+            }
+
             btn.classList.add('used');
             btn.innerText = "Revealed";
             btn.disabled = true;
             
             currentPotential -= penalty;
             document.getElementById('potential-points').innerText = currentPotential;
-            
             updateClueState();
-
-            const clueData = questions[currentIdx].clues[idx];
-            const content = clueData.content;
-            
-            // CHANGED: Update the dialog title to match the hint text
-            document.getElementById('dialog-title').innerText = clueData.hint;
-
-            const dialogBody = document.getElementById('dialog-body');
             
             if (content.startsWith('http://') || content.startsWith('https://')) {
                 const blurPixels = clueData.blur * 0.2;
@@ -353,7 +392,34 @@
 
             document.getElementById('clue-dialog').showModal();
         }
-        
+
+        window.applyReveal = function(clueIdx, numLetters, cost) {
+            document.getElementById('clue-dialog').close();
+            
+            const btn = document.getElementById(`clue-btn-${clueIdx}`);
+            btn.classList.add('used');
+            btn.innerText = "Revealed";
+            btn.disabled = true;
+            
+            currentPotential -= cost;
+            document.getElementById('potential-points').innerText = Math.max(0, currentPotential);
+            
+            const cleanAnswer = activeAnswer.replace(/\s+/g, '');
+            const inputs = Array.from(document.querySelectorAll('.letter-box'));
+            
+            const availableInputs = inputs.filter(input => !input.readOnly);
+            const shuffled = availableInputs.sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, numLetters);
+            
+            selected.forEach(input => {
+                input.value = cleanAnswer[input.dataset.index];
+                input.readOnly = true;
+                input.classList.add('revealed');
+            });
+            
+            updateClueState();
+        };
+
         function getEnteredAnswer() {
             const inputs = document.querySelectorAll('.letter-box');
             let userAns = "";
@@ -373,32 +439,33 @@
             } else {
                 currentPotential -= 1;
                 document.getElementById('potential-points').innerText = Math.max(0, currentPotential);
-                
-                // Re-evaluate remaining clues after a wrong answer deduction
                 updateClueState();
 
-                if (currentPotential < 0) {
+                if (currentPotential <= 0) {
                     giveUp();
                 } else {
                     const submitBtn = document.getElementById('btn-submit');
                     submitBtn.disabled = true;
                     
                     inputs.forEach(input => {
-                        input.classList.add('wrong');
-                        input.disabled = true;
+                        if (!input.readOnly) {
+                            input.classList.add('wrong');
+                            input.disabled = true;
+                        }
                     });
                     
                     setTimeout(() => {
                         inputs.forEach(input => {
-                            input.classList.remove('wrong');
-                            input.value = '';
-                            input.disabled = false;
+                            if (!input.readOnly) {
+                                input.classList.remove('wrong');
+                                input.value = '';
+                                input.disabled = false;
+                            }
                         });
                         submitBtn.disabled = false;
                         
-                        if (inputs.length > 0) {
-                            inputs[0].focus();
-                        }
+                        const firstAvailable = Array.from(inputs).find(inp => !inp.readOnly);
+                        if (firstAvailable) firstAvailable.focus();
                     }, 2500);
                 }
             }
@@ -408,8 +475,10 @@
             const cleanAnswer = activeAnswer.replace(/\s+/g, '');
             const inputs = document.querySelectorAll('.letter-box');
             for (let i = 0; i < cleanAnswer.length; i++) {
-                inputs[i].value = cleanAnswer[i];
-                inputs[i].classList.add('wrong');
+                if (!inputs[i].readOnly) {
+                    inputs[i].value = cleanAnswer[i];
+                    inputs[i].classList.add('wrong');
+                }
             }
             currentPotential = 0;
             endTurn();
