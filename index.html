@@ -14,6 +14,8 @@
             --text-muted: #4b5563;
             --danger: #ef4444;
             --success: #10b981;
+            --whatsapp: #25D366;
+            --whatsapp-hover: #128C7E;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
@@ -69,6 +71,10 @@
         .btn-giveup:hover:not(:disabled) { background: #f3f4f6; }
         .btn-next { background: var(--success); color: white; width: 100%; margin-top: 16px; display: none; }
         .btn-full-width { width: 100%; flex: none; }
+        
+        /* WhatsApp Button */
+        .btn-whatsapp { background: var(--whatsapp); color: white; width: 100%; display: none; margin-top: 12px; }
+        .btn-whatsapp:hover:not(:disabled) { background: var(--whatsapp-hover); }
 
         /* Dialog / Modal */
         dialog { margin: auto; border: none; padding: 24px; border-radius: 12px; max-width: 90%; width: 400px; box-shadow: 0 20px 25px rgba(0,0,0,0.15); outline: none; }
@@ -130,9 +136,10 @@
 
     <!-- End Screen -->
     <div class="quiz-container hidden" id="end-box">
-        <h2>Quiz Complete!</h2>
+        <h2 id="end-title">Quiz Complete!</h2>
         <p style="font-size: 1.25rem; margin-bottom: 20px;">Your final score is: <strong id="final-score">0</strong> points.</p>
         <button class="btn-submit btn-full-width" onclick="location.reload()">Return to Menu</button>
+        <button class="btn-whatsapp" id="btn-whatsapp" onclick="shareOnWhatsApp()">Share on WhatsApp</button>
     </div>
 
     <!-- Clue Modal -->
@@ -148,6 +155,30 @@
         let totalScore = 0;
         let currentPotential = 5;
         let activeAnswer = ""; 
+        let currentPackTitle = "Interactive Quiz";
+        let currentFilename = "";
+
+        // Cookie Helper Functions
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for(let i=0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
 
         window.onload = async () => {
             loadPacksList();
@@ -159,6 +190,10 @@
                 }
             } catch (err) {}
         };
+
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
 
         async function loadPacksList() {
             const packsContainer = document.getElementById('quiz-packs');
@@ -172,8 +207,11 @@
                     data.packs.forEach(pack => {
                         const btn = document.createElement('button');
                         btn.className = 'btn-submit btn-full-width';
-                        btn.innerText = `Play: ${pack.title}`;
-                        btn.onclick = () => startQuiz(pack.file);
+                        btn.innerText = `${pack.title}`;
+                        btn.onclick = () => {
+                            currentPackTitle = pack.title;
+                            startQuiz(pack.file);
+                        };
                         packsContainer.appendChild(btn);
                     });
                 } else {
@@ -185,7 +223,26 @@
         }
 
         async function startQuiz(filename) {
+            currentFilename = filename;
             document.getElementById('start-box').classList.add('hidden');
+            
+            // Check if user has already completed this pack
+            const cookieName = "quiz_score_" + encodeURIComponent(filename);
+            const savedScore = getCookie(cookieName);
+            
+            if (savedScore !== null) {
+                totalScore = parseInt(savedScore); // Set for WhatsApp sharing
+                document.getElementById('end-title').innerText = "You've already played this pack!";
+                document.getElementById('end-box').classList.remove('hidden');
+                document.getElementById('final-score').innerText = totalScore;
+                
+                if (isMobileDevice()) {
+                    document.getElementById('btn-whatsapp').style.display = 'block';
+                }
+                return;
+            }
+
+            document.getElementById('end-title').innerText = "Quiz Complete!";
             await loadQuestions(filename);
             document.getElementById('quiz-box').classList.remove('hidden');
         }
@@ -197,7 +254,8 @@
                 
                 if (!text.trim().startsWith('Q:')) {
                     const lines = text.split('\n');
-                    lines.shift(); 
+                    const firstLine = lines.shift().trim();
+                    if (filename === 'demo.txt') currentPackTitle = firstLine || "Demo Quiz";
                     text = lines.join('\n');
                 }
 
@@ -501,7 +559,20 @@
                 document.getElementById('quiz-box').classList.add('hidden');
                 document.getElementById('end-box').classList.remove('hidden');
                 document.getElementById('final-score').innerText = totalScore;
+                
+                // Set the anti-cheat cookie for 7 days
+                const cookieName = "quiz_score_" + encodeURIComponent(currentFilename);
+                setCookie(cookieName, totalScore, 7);
+                
+                if (isMobileDevice()) {
+                    document.getElementById('btn-whatsapp').style.display = 'block';
+                }
             }
+        }
+
+        function shareOnWhatsApp() {
+            const message = encodeURIComponent(`I scored ${totalScore} points playing the '${currentPackTitle}' trivia quiz`);
+            window.open(`https://wa.me/?text=${message}`, '_blank');
         }
     </script>
 </body>
